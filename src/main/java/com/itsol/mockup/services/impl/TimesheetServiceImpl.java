@@ -115,7 +115,7 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
     @Override
     public BaseResultDTO searchTimesheetByuser(UsersDTO usersDTO, Integer pageSize, Integer page) {
         ArrayResultDTO<TimesheetDTO> arrayResultDTO = new ArrayResultDTO<>();
-        /*List<TimesheetDTO> list = new ArrayList<>();
+        List<TimesheetDTO> list = new ArrayList<>();
         try {
             TimeSheetEntity timeSheetEntity = modelMapper.map(usersDTO, TimeSheetEntity.class);
             Page<TimeSheetEntity> rawDatas = (Page<TimeSheetEntity>) timesheetRepository.findTimeSheetEntitiesByUser(timeSheetEntity, PageRequest.of(page, pageSize));
@@ -131,7 +131,7 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
         }catch (Exception e){
             logger.error("ERR searchTimesheetByuser" +e.getMessage(), e);
             arrayResultDTO.setFail(e.getMessage());
-        }*/
+        }
         return arrayResultDTO;
     }
 }
