@@ -16,7 +16,6 @@ import java.util.List;
 public class ResultDTO {
     private String errorCode;
     private String description;
-    private List<?> listData = new ArrayList();
     private Object data;
     private Long totalRow = 0L;
     private Integer totalPage = 0;
