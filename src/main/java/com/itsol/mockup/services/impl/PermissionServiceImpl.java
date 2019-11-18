@@ -6,6 +6,7 @@ import com.itsol.mockup.repository.UsersRepository;
 import com.itsol.mockup.services.PermissionService;
 import com.itsol.mockup.web.dto.BaseDTO;
 import com.itsol.mockup.web.dto.permisson.PermissionDTO;
+import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.response.SingleResultDTO;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +62,7 @@ public class PermissionServiceImpl extends BaseService implements PermissionServ
         SingleResultDTO singleResultDTO = new SingleResultDTO();
         try{
             PermissionEntity permissionEntity = modelMapper.map(permissionDTO, PermissionEntity.class);
+//            permissionDTO.setUser();
             permissionEntity = permissionRepository.save(permissionEntity);
             if(permissionEntity.getPermissionId() != null) {
                 singleResultDTO.setSuccess(permissionEntity);
@@ -110,4 +113,125 @@ public class PermissionServiceImpl extends BaseService implements PermissionServ
         }
         return singleResultDTO;
     }
+
+
+    @Override
+    public BaseResultDTO findPermissionByUserName(String userName,Integer page, Integer pageSize) {
+        logger.info("START FIND PERMISSION BY USERNAME::");
+        ArrayResultDTO arrayResultDTO = new ArrayResultDTO();
+        List<PermissionDTO> list = new ArrayList<>();
+        try {
+            Page<PermissionEntity> data = permissionRepository.getPermissionEntityByUser_UserName(userName, PageRequest.of(page -1, pageSize));
+            if (data != null) {
+                if (data.getContent().size() >0) {
+                    for (PermissionEntity permissionEntity : data.getContent()) {
+                        PermissionDTO permissionDTO = modelMapper.map(permissionEntity, PermissionDTO.class);
+                        list.add(permissionDTO);
+                    }
+                }
+                arrayResultDTO.setSuccess(list,data.getTotalElements(),data.getTotalPages());
+                logger.info("FIND ALL PERMISSION BY STATUS WITH RESULT"+ arrayResultDTO.getErrorCode());
+            }
+        }catch (Exception e){
+            arrayResultDTO.setFail("FAIL");
+            logger.error(e.getMessage());
+        }
+
+        return arrayResultDTO;
+    }
+
+
+    @Override
+    public BaseResultDTO findAllPermissionByStatus(Integer status,Integer page,Integer pageSize) {
+        logger.info("START FIND ALL PERMISSION BY STATUS::");
+        ArrayResultDTO arrayResultDTO = new ArrayResultDTO();
+        List<PermissionDTO> list = new ArrayList<>();
+        try {
+            Page<PermissionEntity> data = permissionRepository.findPermissionEntitiesByStatus(status, PageRequest.of(page -1, pageSize));
+            if (data != null) {
+                for (PermissionEntity permissionEntity : data.getContent()) {
+                    PermissionDTO permissionDTO = modelMapper.map(permissionEntity, PermissionDTO.class);
+                    list.add(permissionDTO);
+                }
+                arrayResultDTO.setSuccess(list, data.getTotalElements(), data.getTotalPages());
+                logger.info("FIND ALL PERMISSION BY STATUS RESPONSE::" + arrayResultDTO.getErrorCode());
+            }
+        }catch (Exception e){
+            arrayResultDTO.setFail("FAIL");
+            logger.error(e.getMessage());
+        }
+        return arrayResultDTO;
+    }
+
+    @Override
+    public BaseResultDTO searchPermission(SearchUsersRequestDTO searchUsersRequestDTO) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        ArrayResultDTO arrayResultDTO = new ArrayResultDTO();
+        List<PermissionEntity> list;
+        if (searchUsersRequestDTO.getUserName() != null) {
+            Page<PermissionEntity> data = permissionRepository.getPermissionEntityByUser_UserName(searchUsersRequestDTO.getUserName(), PageRequest.of(1 - 1, 20));
+            list = data.getContent();
+        } else {
+            list = permissionRepository.findAll();
+        }
+        List result = new ArrayList();
+        for (PermissionEntity permissionEntity: list) {
+            PermissionDTO permissionDTO = modelMapper.map(permissionEntity, PermissionDTO.class);
+            String fullName = searchUsersRequestDTO.getFullName().trim().toLowerCase()
+                    .replace("\\", "\\\\")
+                    .replaceAll("%", "\\%")
+                    .replaceAll("_", "\\_");
+            if (searchUsersRequestDTO.getFullName() != "" &&
+                    searchUsersRequestDTO.getFromDate() == null &&
+                    searchUsersRequestDTO.getToDate() == null){
+                if (permissionDTO.getUser().getFullName().contains(fullName)) {
+                    result.add(permissionDTO);
+                }
+            }else if (searchUsersRequestDTO.getFromDate() != null &&
+                    searchUsersRequestDTO.getToDate() == null &&
+                    searchUsersRequestDTO.getFullName() != ""
+            ){
+                String fDate = simpleDateFormat.format(permissionDTO.getAbsenceDate());
+                String sDate = simpleDateFormat.format(searchUsersRequestDTO.getFromDate());
+                if (fDate.equals(sDate) && permissionDTO.getUser().getFullName().contains(searchUsersRequestDTO.getFullName()))
+                {
+                    result.add(permissionDTO);
+                }
+            }else if (searchUsersRequestDTO.getFromDate() != null
+                    && searchUsersRequestDTO.getToDate() != null
+                    && searchUsersRequestDTO.getFullName() != null | searchUsersRequestDTO.getUserName() != ""){
+                if ((permissionDTO.getUser().getFullName().contains(fullName)) &&
+                        (permissionDTO.getAbsenceDate().after(searchUsersRequestDTO.getFromDate()) &&
+                                permissionDTO.getAbsenceDate().before(searchUsersRequestDTO.getToDate()))
+                ) {
+                    result.add(permissionDTO);
+                }
+            }
+            else if (searchUsersRequestDTO.getFromDate() != null
+                    && searchUsersRequestDTO.getToDate() != null
+                    && searchUsersRequestDTO.getUserName() == ""){
+                if ((permissionDTO.getAbsenceDate().after(searchUsersRequestDTO.getFromDate()) &&
+                        permissionDTO.getAbsenceDate().before(searchUsersRequestDTO.getToDate()))
+                ) {
+                    result.add(permissionDTO);
+                }
+            }
+
+            else if (searchUsersRequestDTO.getFromDate() != null
+                    && searchUsersRequestDTO.getToDate() == null
+                    && searchUsersRequestDTO.getUserName() == null) {
+                String fDate = simpleDateFormat.format(permissionDTO.getAbsenceDate());
+                String sDate = simpleDateFormat.format(searchUsersRequestDTO.getFromDate());
+                if (fDate.equals(sDate))
+                {
+                    result.add(permissionDTO);
+                }
+            }
+        }
+
+        arrayResultDTO.setSuccess(result);
+        return arrayResultDTO;
+    }
+
+
 }

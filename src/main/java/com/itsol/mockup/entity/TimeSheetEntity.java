@@ -41,5 +41,5 @@ public class TimeSheetEntity {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "USER_ID")
-    private UsersEntity user;
+    private UsersEntity usersEntity;
 }

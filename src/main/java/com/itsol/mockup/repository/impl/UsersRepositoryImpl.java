@@ -1,5 +1,7 @@
 package com.itsol.mockup.repository.impl;
 
+import com.itsol.mockup.entity.RoleEntity;
+import com.itsol.mockup.entity.UsersEntity;
 import com.itsol.mockup.repository.UsersRepositoryCustom;
 import com.itsol.mockup.utils.DataUtils;
 import com.itsol.mockup.utils.HibernateUtil;
@@ -14,10 +16,7 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.transform.Transformers;
-import org.hibernate.type.IntegerType;
-import org.hibernate.type.LongType;
-import org.hibernate.type.ShortType;
-import org.hibernate.type.StringType;
+import org.hibernate.type.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,31 +33,30 @@ public class UsersRepositoryImpl implements UsersRepositoryCustom {
     private static final Logger logger = LogManager.getLogger(UsersRepositoryImpl.class);
 
     @Override
-    public Page<UsersDTO> findUsersByFullNameAndUserName(SearchUsersRequestDTO requestDTO) {
+    public Page<UsersDTO> findUsersByUsernameAndEmailAndRoles(SearchUsersRequestDTO requestDTO) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_USERS, "select-user"));
-            if (!DataUtils.isNullOrEmpty(requestDTO.getFullName())) {
-                sb.append(" AND UPPER(u.full_name) like :p_full_name ");
-            }
+//            sb.append(SQLBuilder.getSqlQueryById(SQLBuilder.SQL_MODULE_USERS, "select-user"));
+
+            sb.append("SELECT u.users_id userId, u.username userName, u.password passWord, u.full_name fullName, u.email email, u.skype skypeName, u.phone phone, u.education education, u.level_id levelId, u.image_id imageId,  r.role_name roleName FROM USERS u ");
+            sb.append(" inner join users_role ur on u.users_id = ur.users_id join role r on ur.role_id = r.role_id WHERE 1 = 1");
+
             if (!DataUtils.isNullOrEmpty(requestDTO.getUserName())) {
-                sb.append(" AND UPPER(u.user_name) like :p_user_name ");
+//                sb.append(" AND UPPER(u.full_name) like :p_full_name ");
+                sb.append(" AND UPPER(u.username) like :p_user_name");
+            }
+            if (!DataUtils.isNullOrEmpty(requestDTO.getEmail())) {
+                sb.append(" AND UPPER(u.email) like :p_email ");
+            }
+            if (!DataUtils.isNullOrZero(requestDTO.getRole())) {
+                sb.append(" AND ur.role_id  = " + requestDTO.getRole());
             }
 
             SQLQuery query = session.createSQLQuery(sb.toString());
-
-            if (!DataUtils.isNullOrEmpty(requestDTO.getFullName())) {
-                query.setParameter("p_full_name", "%" +
-                        requestDTO.getFullName().trim().toUpperCase()
-                                .replace("\\", "\\\\")
-                                .replaceAll("%", "\\%")
-                                .replaceAll("_", "\\_")
-                        + "%");
-            }
 
             if (!DataUtils.isNullOrEmpty(requestDTO.getUserName())) {
                 query.setParameter("p_user_name", "%" +
@@ -69,16 +67,26 @@ public class UsersRepositoryImpl implements UsersRepositoryCustom {
                         + "%");
             }
 
-            query.addScalar("id", new LongType());
+            if (!DataUtils.isNullOrEmpty(requestDTO.getEmail())) {
+                query.setParameter("p_email", "%" +
+                        requestDTO.getEmail().trim().toUpperCase()
+                                .replace("\\", "\\\\")
+                                .replaceAll("%", "\\%")
+                                .replaceAll("_", "\\_")
+                        + "%");
+            }
+
+            query.addScalar("userId", new LongType());
             query.addScalar("userName", new StringType());
             query.addScalar("passWord", new StringType());
             query.addScalar("fullName", new StringType());
-            query.addScalar("email", new ShortType());
-            query.addScalar("skypeName", new ShortType());
-            query.addScalar("phone", new ShortType());
-            query.addScalar("levelId", new ShortType());
-            query.addScalar("imageId", new ShortType());
-
+            query.addScalar("email", new StringType());
+            query.addScalar("skypeName", new StringType());
+            query.addScalar("phone", new StringType());
+            query.addScalar("education", new StringType());
+            query.addScalar("levelId", new IntegerType());
+            query.addScalar("imageId", new IntegerType());
+            query.addScalar("roleName", new StringType());
             query.setResultTransformer(Transformers.aliasToBean(UsersDTO.class));
 
             int count = 0;

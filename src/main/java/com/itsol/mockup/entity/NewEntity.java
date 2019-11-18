@@ -40,6 +40,9 @@ public class NewEntity {
     @Column(name = "content")
     private String content;
 
+    @Column(name= "image_id")
+    private Long imageId;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")

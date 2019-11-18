@@ -30,7 +30,7 @@ public class SpringUserDetailsServiceImpl implements UserDetailsService {
         List<RoleEntity> lst = user.getRoles();
         StringBuilder test = new StringBuilder();
         lst.forEach(i -> {
-            test.append(i.getName());
+            test.append("ROLE_"+i.getName());
         });
 
         if(user == null) {

@@ -17,11 +17,14 @@ public class NewController {
     @Autowired
     private NewService newService;
 
-    @RequestMapping(value = "/news/list",method = RequestMethod.GET)
-    public ResponseEntity<BaseResultDTO> findAll() {
-        BaseResultDTO result = newService.findAll();
+    @RequestMapping(value = "/new/list",method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> findAll(@RequestParam("pageSize") Integer PageSize,
+                                                 @RequestParam("page") Integer page ) {
+        BaseResultDTO result = newService.findAll(PageSize, page);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+
     @RequestMapping(value = "/new",method = RequestMethod.POST)
     public ResponseEntity<BaseResultDTO> addNew(@RequestBody NewsDTO newsDTO){
         BaseResultDTO result = newService.addNew(newsDTO);
@@ -38,4 +41,18 @@ public class NewController {
         BaseResultDTO result = newService.deleteNew(id);
         return  new ResponseEntity<>(result,HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/new",method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> fillOneNew(@RequestParam("id") Long id){
+        BaseResultDTO result = newService.findOneById(id);
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/new/list/public",method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> findAllPublic(@RequestParam("pageSize") Integer PageSize,
+                                                       @RequestParam("page") Integer page ) {
+        BaseResultDTO result = newService.findNewPublic(PageSize, page);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }

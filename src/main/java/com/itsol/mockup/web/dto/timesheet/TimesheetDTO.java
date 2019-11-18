@@ -17,6 +17,6 @@ public class TimesheetDTO {
     private String note;
     private Integer status;
     private Long projectId;
-    private UsersDTO user;
+    private UsersEntity usersEntity;
 
 }

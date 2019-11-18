@@ -1,5 +1,6 @@
 package com.itsol.mockup.web.dto.issue;
 
+import com.itsol.mockup.web.dto.project.ProjectDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,4 +18,11 @@ public class IssueDTO {
     private Integer status;
 
     private Date modifiedDate;
+
+    private String content;
+
+    private ProjectDTO project;
+
+    private Long userId;
+
 }

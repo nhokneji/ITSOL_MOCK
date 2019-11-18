@@ -3,6 +3,7 @@ package com.itsol.mockup.web.rest.projects;
 import com.itsol.mockup.services.ProjectService;
 import com.itsol.mockup.web.dto.BaseDTO;
 import com.itsol.mockup.web.dto.project.ProjectDTO;
+import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.rest.BaseRest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,25 @@ public class ProjectController extends BaseRest {
     @RequestMapping(value = "/projects/searchProjectById",method = RequestMethod.GET)
     public ResponseEntity<BaseResultDTO> findProjectById(@RequestParam("id") long id) {
         BaseResultDTO result = projectService.findProjectById(id);
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+
+    @RequestMapping(value = "/projects/findProjectAndTeamLeadByProjectId",method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> findProjectAndTeamLeadByProjectId(@RequestParam("id") long id) {
+        BaseResultDTO result = projectService.findProjectAndTeamLeadByProjectId(id);
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/projects/getTotalMember",method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> getTotalMember(@RequestParam("id") long id) {
+        BaseResultDTO result = projectService.getTotalMember(id);
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/projects/getTotalTimesheet",method = RequestMethod.POST)
+    public ResponseEntity<BaseResultDTO> getTotalMember(@RequestBody SearchUsersRequestDTO searchUsersRequestDTO) {
+        BaseResultDTO result = projectService.getTotalTimesheet(searchUsersRequestDTO);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 

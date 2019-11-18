@@ -42,35 +42,55 @@ public class UsersController extends BaseRest {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/find-by-fullname-username", method = RequestMethod.GET)
-    public ResponseEntity<BaseResultDTO> findByFullNameAndUserName (@RequestBody SearchUsersRequestDTO requestDTO){
-        BaseResultDTO result = usersService.findUsersByFullNameAndUserName(requestDTO);
+    @RequestMapping(value = "/deleteUser", method = RequestMethod.DELETE)
+    public ResponseEntity<BaseResultDTO> deleteUser(@RequestParam("id") Long id) {
+        BaseResultDTO result = usersService.deleteUser(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/find-by-fullname-username", method = RequestMethod.POST)
+    public ResponseEntity<BaseResultDTO> findByFullNameAndUserName(@RequestBody SearchUsersRequestDTO requestDTO) {
+        BaseResultDTO result = usersService.findUsersByUsernameAndEmailAndRoles(requestDTO);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping(value = "/findAll")
-    public ResponseEntity<BaseResultDTO> findAllUser(){
+    public ResponseEntity<BaseResultDTO> findAllUser() {
         BaseResultDTO resultDTO = usersService.findAll();
         return new ResponseEntity<>(resultDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/get-allUser-not-listId")
-    public ResponseEntity<BaseResultDTO> searchAllUserNotIds(@RequestBody IdRequestDTO idRequestDTO){
+    public ResponseEntity<BaseResultDTO> searchAllUserNotIds(@RequestBody IdRequestDTO idRequestDTO) {
         BaseResultDTO baseResultDTO = usersService.findAllUsersNotListId(idRequestDTO);
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/info")
-    public ResponseEntity<BaseResultDTO> UserInfo(@RequestHeader HttpHeaders header){
-        BaseResultDTO baseResultDTO  = usersService.findUserEntityByUserName(retrieveToken(header));
+    public ResponseEntity<BaseResultDTO> UserInfo(@RequestHeader HttpHeaders header) {
+        BaseResultDTO baseResultDTO = usersService.findUserEntityByUserName(retrieveToken(header));
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
 
     @GetMapping(value = "/updateActiveUser")
-    public ResponseEntity<BaseResultDTO> updateActiveUser(@RequestParam("userName") String userName){
-        BaseResultDTO baseResultDTO  = usersService.updateActiceUser(userName);
+    public ResponseEntity<BaseResultDTO> updateActiveUser(@RequestParam("userName") String userName) {
+        BaseResultDTO baseResultDTO = usersService.updateActiceUser(userName);
         return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
     }
+
+    @GetMapping(value = "/userById")
+    public ResponseEntity<BaseResultDTO> userById(@RequestParam("id") Long id) {
+        BaseResultDTO baseResultDTO = usersService.findUserbyId(id);
+        return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/updateActiveUser")
+    public ResponseEntity<BaseResultDTO> updateRoleUser(@RequestParam("id") Long id,
+                                                        @RequestParam("role") Long role) {
+        BaseResultDTO baseResultDTO = usersService.updateRoleUser(id, role);
+        return new ResponseEntity<>(baseResultDTO, HttpStatus.OK);
+    }
+
 
 //    @GetMapping(value = "/updateImageId")
 //    public ResponseEntity<BaseResultDTO> updateImage(@RequestParam("userName") String userName){

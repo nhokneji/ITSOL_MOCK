@@ -14,6 +14,7 @@ SELECT
     u.email email,
     u.skype skypeName,
     u.phone phone,
+    u.education education,
     u.level_id levelId,
     u.image_id imageId
 FROM USERS u

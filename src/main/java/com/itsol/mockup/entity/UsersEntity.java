@@ -89,7 +89,7 @@ public class UsersEntity {
     @OneToMany(mappedBy = "user")
     private List<NewEntity> news = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "usersEntity")
     private List<TimeSheetEntity> timeSheets = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")

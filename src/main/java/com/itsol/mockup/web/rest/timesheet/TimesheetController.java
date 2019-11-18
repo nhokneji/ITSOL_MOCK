@@ -27,9 +27,10 @@ public class TimesheetController extends BaseRest {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
      @RequestMapping("/timesheet/listByUser")
-    public ResponseEntity<BaseResultDTO> findAllTimeSheetById(UsersDTO usersDTO, @RequestParam("pageSize") Integer pageSize,
+    public ResponseEntity<BaseResultDTO> findAllTimeSheetById(@RequestHeader HttpHeaders headers,
+                                                              @RequestParam("pageSize") Integer pageSize,
                                                               @RequestParam("page") Integer page){
-        BaseResultDTO result = timesheetService.searchTimesheetByuser(usersDTO, pageSize, page);
+        BaseResultDTO result = timesheetService.searchTimesheetByuser(retrieveToken(headers), pageSize, page);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
     @RequestMapping(value = "/timesheet",method = RequestMethod.POST)
@@ -46,6 +47,12 @@ public class TimesheetController extends BaseRest {
     @RequestMapping(value = "/timesheet",method = RequestMethod.DELETE)
     public ResponseEntity<BaseResultDTO> deleteTimesheet(Long id){
         BaseResultDTO result = timesheetService.deleteTimesheet(id);
+        return new ResponseEntity<>(result,HttpStatus.OK);
+    }
+    @RequestMapping(value = "/timesheet/updateStatus",method = RequestMethod.PUT)
+    public ResponseEntity<BaseResultDTO> updateStatus(@RequestParam("id") Long id,
+                                                      @RequestParam("status") Integer status){
+        BaseResultDTO result = timesheetService.updateStatusTimeSheet(id, status);
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 }

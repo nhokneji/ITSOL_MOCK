@@ -4,6 +4,7 @@ package com.itsol.mockup.web.rest.permission;
 import com.itsol.mockup.services.PermissionService;
 import com.itsol.mockup.web.dto.BaseDTO;
 import com.itsol.mockup.web.dto.permisson.PermissionDTO;
+import com.itsol.mockup.web.dto.request.SearchUsersRequestDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -42,4 +43,26 @@ public class PermissionController {
         BaseResultDTO result = permissionService.deletePermission(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/permission/findByStatus", method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> findAllPermissionByStatus(@RequestParam("page") Integer page,
+                                                                   @RequestParam("pageSize") Integer pageSize){
+        BaseResultDTO result = permissionService.findAllPermissionByStatus(0,page,pageSize);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/permission/findByUserName", method = RequestMethod.GET)
+    public ResponseEntity<BaseResultDTO> findPermissionByStatus(@RequestParam("username") String username,
+                                                                @RequestParam("page") Integer page,
+                                                                @RequestParam("pageSize") Integer pageSize){
+        BaseResultDTO result = permissionService.findPermissionByUserName(username, page, pageSize);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/permission/search", method = RequestMethod.POST)
+    public ResponseEntity<BaseResultDTO> searchPermission(@RequestBody SearchUsersRequestDTO searchUsersRequestDTO){
+        BaseResultDTO result = permissionService.searchPermission(searchUsersRequestDTO);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }

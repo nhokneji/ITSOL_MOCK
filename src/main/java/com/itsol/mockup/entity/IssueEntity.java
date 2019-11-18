@@ -1,5 +1,6 @@
 package com.itsol.mockup.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +30,11 @@ public class IssueEntity {
     @Column(name = "modified_date")
     private Date modifiedDate;
 
-    @Column(name = "project_id")
-    private Long projectId;
+    @Column(name="CONTENT")
+    private String content;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "PROJECT_ID")
+    private ProjectEntity project;
 }

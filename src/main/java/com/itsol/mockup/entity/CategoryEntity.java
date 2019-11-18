@@ -22,5 +22,4 @@ public class CategoryEntity {
 
     @Column(name = "category_code")
     private String code;
-
 }

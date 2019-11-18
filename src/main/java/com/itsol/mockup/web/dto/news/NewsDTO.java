@@ -1,8 +1,6 @@
 package com.itsol.mockup.web.dto.news;
 
-import com.itsol.mockup.entity.CategoryEntity;
-import com.itsol.mockup.entity.ImageEntity;
-import com.itsol.mockup.entity.UsersEntity;
+import com.itsol.mockup.web.dto.image.ImagesDTO;
 import com.itsol.mockup.web.dto.users.UsersDTO;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,4 +18,5 @@ public class NewsDTO {
     private String createdBy;
     private String modifiedBy;
     private UsersDTO user;
+    private ImagesDTO image;
 }

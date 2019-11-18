@@ -6,6 +6,7 @@ import com.itsol.mockup.services.ImagesService;
 import com.itsol.mockup.web.FileStorageException;
 import com.itsol.mockup.web.FileStorageProperties;
 import com.itsol.mockup.web.MyFileNotFoundException;
+import com.itsol.mockup.web.dto.image.ImagesDTO;
 import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import com.itsol.mockup.web.dto.response.SingleResultDTO;
@@ -22,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class ImagesServiceImpl extends BaseService implements ImagesService {
@@ -31,6 +34,13 @@ public class ImagesServiceImpl extends BaseService implements ImagesService {
 
     @Autowired
     ImagesRepository imagesRepository;
+
+    @Override
+    public ImagesDTO findOneById(Long id) {
+        ImageEntity imageEntity = imagesRepository.findImageEntityByImageId(id);
+        ImagesDTO imagesDTO = modelMapper.map(imageEntity,ImagesDTO.class);
+        return imagesDTO;
+    }
 
     @Autowired
     public ImagesServiceImpl(FileStorageProperties fileStorageProperties) {
@@ -55,19 +65,16 @@ public class ImagesServiceImpl extends BaseService implements ImagesService {
     public BaseResultDTO addImage(MultipartFile file, HttpServletRequest httpServletRequest) {
         logger.info("ADD IMAGES");
         SingleResultDTO singleResultDTO = new SingleResultDTO();
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        LocalDateTime dateTime = LocalDateTime.now();
+        String dateTimeNow = DateTimeFormatter.ofPattern("ddMMYYY_HHmmss").format(dateTime);
+        String fileName = dateTimeNow+"_"+StringUtils.cleanPath(file.getOriginalFilename());
         String host = "http://" + httpServletRequest.getHeader("host") + "/" + UPLOAD_DIR + "/";
 
         try {
-            if (fileName.contains("..")) {
-                throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
-            }
+
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-//            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-//                    .path("api/downloadFile/")
-//                    .path(fileName)
-//                    .toUriString(); //ghép nối các phần để tạo thành link download file
+
             ImageEntity imageEntity = new ImageEntity(fileName, host + fileName);
             imageEntity = imagesRepository.save(imageEntity);
             singleResultDTO.setSuccess(imageEntity);
@@ -102,7 +109,7 @@ public class ImagesServiceImpl extends BaseService implements ImagesService {
     public BaseResultDTO findImageById(Long id) {
         SingleResultDTO<ImageEntity> singleResultDTO = new SingleResultDTO<>();
         try {
-            ImageEntity imageEntity = imagesRepository.findImageEntitiesByImageId(id);
+            ImageEntity imageEntity = imagesRepository.findImageEntityByImageId(id);
             if (imageEntity != null) {
                 singleResultDTO.setSuccess(imageEntity);
             }

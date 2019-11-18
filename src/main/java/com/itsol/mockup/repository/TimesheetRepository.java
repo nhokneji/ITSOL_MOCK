@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TimesheetRepository extends JpaRepository<TimeSheetEntity,Long> {
-
     TimeSheetEntity getTimeSheetEntityByTimesheetId(Long id);
-    Page<TimeSheetEntity> findTimeSheetEntitiesByUser(UsersEntity usersEntity, Pageable pageable);
+    Page<TimeSheetEntity> findTimeSheetEntitiesByUsersEntity(UsersEntity usersEntity, Pageable pageable);
 }

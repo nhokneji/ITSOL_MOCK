@@ -37,7 +37,7 @@ public class ImagesController {
     }
 
     //    headers = "Content-Type= multipart/form-data"
-    @RequestMapping(value = "/image", method = RequestMethod.POST)
+    @RequestMapping(value = "/image", headers = "Content-Type= multipart/form-data" ,method = RequestMethod.POST)
             public ResponseEntity<BaseResultDTO>addImage(@RequestPart("file") MultipartFile file, HttpServletRequest request)
             throws IOException {
         BaseResultDTO result = imagesService.addImage(file, request);

@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
  * @author anhvd_itsol
  */
 public interface UsersRepositoryCustom {
-    Page<UsersDTO> findUsersByFullNameAndUserName(SearchUsersRequestDTO requestDTO);
+    Page<UsersDTO> findUsersByUsernameAndEmailAndRoles(SearchUsersRequestDTO requestDTO);
     Page<UsersDTO> findUserNotRequest(IdRequestDTO request);
 
 }

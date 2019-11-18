@@ -31,6 +31,7 @@ public class UsersDTO {
     private String reason;
     private Integer imageId;
     private Integer levelId;
+    private String roleName;
 
     private List<RoleEntity> roles = new ArrayList<>();
 

@@ -1,6 +1,7 @@
 package com.itsol.mockup.services;
 
 import com.itsol.mockup.entity.ImageEntity;
+import com.itsol.mockup.web.dto.image.ImagesDTO;
 import com.itsol.mockup.web.dto.response.ArrayResultDTO;
 import com.itsol.mockup.web.dto.response.BaseResultDTO;
 import org.springframework.core.io.Resource;
@@ -13,8 +14,6 @@ public interface ImagesService {
     BaseResultDTO addImage(MultipartFile file, HttpServletRequest httpServletRequest);
     BaseResultDTO deleteImages(Long id);
     BaseResultDTO findImageById(Long id);
-
-
-
+    ImagesDTO findOneById(Long id);
     Resource loadFileAsResource(String fileName);
 }

@@ -76,20 +76,20 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     }
 
     @Override
-    public BaseResultDTO findUsersByFullNameAndUserName(SearchUsersRequestDTO requestDTO) {
+    public BaseResultDTO findUsersByUsernameAndEmailAndRoles(SearchUsersRequestDTO requestDTO) {
         logger.info("=== START FIND ALL USERS BY FULL_NAME AND USER_NAME::");
-        SingleResultDTO<UsersDTO> respoonseSingleResultDTO = new SingleResultDTO<>();
+        ArrayResultDTO<UsersDTO> arrayResultDTO = new ArrayResultDTO<>();
         try {
-            Page<UsersDTO> rawDatas = usersRepositoryCustom.findUsersByFullNameAndUserName(requestDTO);
+            Page<UsersDTO> rawDatas = usersRepositoryCustom.findUsersByUsernameAndEmailAndRoles(requestDTO);
             if (rawDatas.getContent().size() > 0) {
-                respoonseSingleResultDTO.setSuccess((UsersDTO) rawDatas.getContent());
+                arrayResultDTO.setSuccess(rawDatas.getContent(), rawDatas.getTotalElements(), rawDatas.getTotalPages());
             }
-            logger.info("=== FIND ALL USERS BY FULL_NAME AND USER_NAME RESPONSE::" + respoonseSingleResultDTO.getErrorCode());
+            logger.info("=== FIND ALL USERS BY FULL_NAME AND USER_NAME RESPONSE::" + arrayResultDTO.getErrorCode());
         } catch (Exception ex) {
-            respoonseSingleResultDTO.setFail(ex.getMessage());
+            arrayResultDTO.setFail(ex.getMessage());
             logger.error(ex.getMessage(), ex);
         }
-        return respoonseSingleResultDTO;
+        return arrayResultDTO;
     }
 
 
@@ -156,24 +156,61 @@ public class UsersServiceImpl extends BaseService implements UsersService {
     }
 
     @Override
+    public BaseResultDTO deleteUser(Long id) {
+        BaseResultDTO baseResultDTO = new BaseResultDTO();
+        try {
+            UsersEntity usersEntity = usersRepository.getUsersEntitiesByUserId(id);
+            if (usersEntity != null) {
+                usersRepository.delete(usersEntity);
+                baseResultDTO.setSuccess();
+                logger.info("DELETE USER REPONSE" + baseResultDTO.getErrorCode());
+            }
+        } catch (Exception e) {
+            logger.error("DELETE USER ERR" + e.getMessage(), e);
+            baseResultDTO.setFail(e.getMessage());
+        }
+        return baseResultDTO;
+    }
+
+    @Override
+    public BaseResultDTO findUserbyId(Long id) {
+        SingleResultDTO<UsersEntity> singleResultDTO = new SingleResultDTO<>();
+        try {
+            UsersEntity usersEntity = usersRepository.findUsersEntityByUserId(id);
+            if (usersEntity != null) {
+                singleResultDTO.setSuccess(usersEntity);
+            }
+        } catch (Exception e) {
+            logger.error("FIND USER BY ID ERR");
+            singleResultDTO.setFail(e.getMessage());
+        }
+        return singleResultDTO;
+    }
+
+    @Override
     public BaseResultDTO addUser(UsersDTO requestDTO) {
         logger.info("=== START ADD NEW USER::");
         BaseResultDTO responseResultDTO = new BaseResultDTO();
+        List<RoleEntity> lst = new ArrayList<>();
 //        String generatedString = RandomStringUtils.randomAlphabetic(10);
         try {
 //            UsersEntity usersEntity = null;
-            if ((usersRepository.findUsersEntityByUserName(requestDTO.getUserName()))!= null){
+            if ((usersRepository.findUsersEntityByUserName(requestDTO.getUserName())) != null) {
                 responseResultDTO.setFail("-3", "người dùng này đã tồn tại !!!!");
                 logger.info("=== ADD NEW USER STOP RESPONES: " + responseResultDTO.getErrorCode());
                 return responseResultDTO;
             }
-            if((usersRepository.findUsersEntityByEmail(requestDTO.getEmail())) != null){
+            if ((usersRepository.findUsersEntityByEmail(requestDTO.getEmail())) != null) {
                 responseResultDTO.setFail("-4", "Email đã được sử dụng !!!!");
                 logger.info("=== ADD NEW USER STOP RESPONES: " + responseResultDTO.getErrorCode());
                 return responseResultDTO;
             }
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            RoleEntity roleEntity = new RoleEntity();
             requestDTO.setPassWord(passwordEncoder.encode(requestDTO.getPassWord()));
+            roleEntity.setRoleId((long) 21);
+            lst.add(roleEntity);
+            requestDTO.setRoles(lst);
             UsersEntity user = modelMapper.map(requestDTO, UsersEntity.class);
             user = usersRepository.save(user);
             if (user != null) {
@@ -201,13 +238,15 @@ public class UsersServiceImpl extends BaseService implements UsersService {
         logger.info("=== START UPDATE USER::" + usersDTO.getUserId());
         BaseResultDTO baseResultDTO = new BaseResultDTO();
         try {
-            UsersEntity user = usersRepository.getUsersEntitiesByUserId(usersDTO.getUserId());
+            UsersEntity user = usersRepository.findUsersEntityByUserId(usersDTO.getUserId());
             if (user.getUserId() != null) {
-                UsersEntity usersEntity = modelMapper.map(usersDTO, UsersEntity.class);
+                usersDTO.setRoles(user.getRoles());
+                user = modelMapper.map(usersDTO, UsersEntity.class);
 //                user.setUserName(usersDTO.getUserName());
 //                user.setFullName(usersDTO.getFullName());
 //                user.setPassWord(usersDTO.getPassWord());
-                usersRepository.save(usersEntity);
+//                usersEntity.setRoles(usersDTO.getRoles());
+                usersRepository.save(user);
                 baseResultDTO.setSuccess();
             }
             logger.info("=== UPDATE USER RESPONSE::" + baseResultDTO.getErrorCode());
@@ -248,6 +287,27 @@ public class UsersServiceImpl extends BaseService implements UsersService {
             response.setFail(e.getMessage());
         }
         return response;
+    }
+
+    @Override
+    public BaseResultDTO updateRoleUser(Long id, Long roleId) {
+        BaseResultDTO baseResultDTO = new BaseResultDTO();
+        List<RoleEntity> list = new ArrayList<>();
+        try {
+            UsersEntity usersEntity = usersRepository.findUsersEntityByUserId(id);
+            if (usersEntity != null) {
+                RoleEntity roleEntity = new RoleEntity();
+                roleEntity.setRoleId(roleId);
+                list.add(roleEntity);
+                usersEntity.setRoles(list);
+                usersRepository.save(usersEntity);
+                baseResultDTO.setSuccess();
+            }
+        } catch (Exception e) {
+            logger.error("UPDATE ROLE USER ERR");
+            baseResultDTO.setFail(e.getMessage());
+        }
+        return baseResultDTO;
     }
 
     // ====== START SERVICES FOR AUTHENTICATION ======

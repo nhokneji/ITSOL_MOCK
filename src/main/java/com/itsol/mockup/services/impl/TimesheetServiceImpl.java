@@ -66,7 +66,7 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
             timesheetDTO.setCreatedDate(getCurTimestamp());
             timesheetDTO.setStatus(0);
             TimeSheetEntity timeSheetEntity = modelMapper.map(timesheetDTO, TimeSheetEntity.class);
-            timeSheetEntity.setUser(usersEntity);
+            timeSheetEntity.setUsersEntity(usersEntity);
             timeSheetEntity = timesheetRepository.save(timeSheetEntity);
             singleResultDTO.setSuccess(timeSheetEntity);
 
@@ -113,25 +113,43 @@ public class TimesheetServiceImpl extends BaseService implements TimesheetServic
     }
 
     @Override
-    public BaseResultDTO searchTimesheetByuser(UsersDTO usersDTO, Integer pageSize, Integer page) {
+    public BaseResultDTO searchTimesheetByuser(String token, Integer pageSize, Integer page) {
         ArrayResultDTO<TimesheetDTO> arrayResultDTO = new ArrayResultDTO<>();
         List<TimesheetDTO> list = new ArrayList<>();
         try {
-            TimeSheetEntity timeSheetEntity = modelMapper.map(usersDTO, TimeSheetEntity.class);
-            Page<TimeSheetEntity> rawDatas = (Page<TimeSheetEntity>) timesheetRepository.findTimeSheetEntitiesByUser(timeSheetEntity, PageRequest.of(page, pageSize));
+
+            UsersEntity usersEntity = usersRepository.findUsersEntityByUserName(tokenUtils.getUsernameFromToken(token));
+            Page<TimeSheetEntity> rawDatas = timesheetRepository.findTimeSheetEntitiesByUsersEntity(usersEntity, PageRequest.of(page, pageSize));
         if (rawDatas != null){
-            rawDatas.forEach(timeSheet -> {
-                TimesheetDTO timesheetDTO = modelMapper.map(timeSheet, TimesheetDTO.class);
-                list.add(timesheetDTO);
-            });
+            if(rawDatas.getContent().size() > 0){
+                rawDatas.getContent().forEach(timeSheetEntity -> {
+                    TimesheetDTO timesheetDTO = modelMapper.map(timeSheetEntity, TimesheetDTO.class);
+                    list.add(timesheetDTO);
+                });
+            }
             arrayResultDTO.setSuccess(list, rawDatas.getTotalElements(), rawDatas.getTotalPages());
             logger.info("=== FIND TIMESHEET BY ID USER RESPONSE::" + arrayResultDTO.getErrorCode());
         }
-
         }catch (Exception e){
             logger.error("ERR searchTimesheetByuser" +e.getMessage(), e);
             arrayResultDTO.setFail(e.getMessage());
         }
         return arrayResultDTO;
+    }
+
+    @Override
+    public BaseResultDTO updateStatusTimeSheet(Long id, Integer status) {
+        BaseResultDTO baseResultDTO = new BaseResultDTO();
+        try {
+            TimeSheetEntity timeSheetEntity = timesheetRepository.getTimeSheetEntityByTimesheetId(id);
+            if (timeSheetEntity != null){
+                timeSheetEntity.setStatus(status);
+                timesheetRepository.save(timeSheetEntity);
+            }
+        }catch (Exception e){
+            logger.error("UPDATE STATUS TIMESHEET ERRR: "+ e.getMessage(), e);
+            baseResultDTO.setFail(e.getMessage());
+        }
+        return baseResultDTO;
     }
 }

@@ -5,6 +5,7 @@ import com.itsol.mockup.web.dto.image.ImagesDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ImagesRepository extends JpaRepository<ImageEntity,Long> {
-    ImageEntity findImageEntitiesByImageId(Long id);
+    ImageEntity findImageEntityByImageId(Long id);
+//    findImageEntityByImageId
 
 }
